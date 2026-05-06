@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Team Task Manager</title>
+  <meta name="description" content="Collaborate, assign, and track your team's tasks with role-based access, real-time dashboards, and powerful project management tools." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+</head>
+<body>
+  <!-- ── Auth Overlay ─────────────────────────────────────────────────────── -->
+  <div id="auth-overlay" class="auth-overlay">
+    <div class="auth-bg-glow"></div>
+    <div class="auth-container">
+      <div class="auth-brand">
+        <div class="auth-logo">⚡</div>
+        <h1 class="auth-title">TaskFlow</h1>
+        <p class="auth-subtitle">Team collaboration, simplified</p>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-form" class="auth-form active">
+        <h2>Welcome back</h2>
+        <p class="form-hint">Sign in to your workspace</p>
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="you@company.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <div class="input-icon-wrap">
+            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+            <button class="toggle-pwd" onclick="togglePassword('login-password', this)">👁</button>
+          </div>
+        </div>
+        <div id="login-error" class="form-error hidden"></div>
+        <button id="login-btn" class="btn-primary btn-full" onclick="handleLogin()">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-loader hidden">⟳</span>
+        </button>
+        <p class="auth-switch">Don't have an account? <a href="#" onclick="switchForm('register')">Create one</a></p>
+        <div class="demo-accounts">
+          <p class="demo-label">Demo accounts:</p>
+          <button class="demo-btn" onclick="fillDemo('admin@demo.com','admin123')">👑 Admin Demo</button>
+          <button class="demo-btn" onclick="fillDemo('alice@demo.com','member123')">👤 Member Demo</button>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form" class="auth-form">
+        <h2>Create account</h2>
+        <p class="form-hint">Join your team workspace</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" placeholder="John Doe" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="reg-role">Role</label>
+            <select id="reg-role">
+              <option value="member">Member</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Email</label>
+          <input type="email" id="reg-email" placeholder="you@company.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <div class="input-icon-wrap">
+            <input type="password" id="reg-password" placeholder="Min. 6 characters" autocomplete="new-password" />
+            <button class="toggle-pwd" onclick="togglePassword('reg-password', this)">👁</button>
+          </div>
+        </div>
+        <div id="reg-error" class="form-error hidden"></div>
+        <button id="reg-btn" class="btn-primary btn-full" onclick="handleRegister()">
+          <span class="btn-text">Create Account</span>
+          <span class="btn-loader hidden">⟳</span>
+        </button>
+        <p class="auth-switch">Already have an account? <a href="#" onclick="switchForm('login')">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── App Shell ─────────────────────────────────────────────────────────── -->
+  <div id="app" class="app hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">⚡</div>
+        <span class="sidebar-brand">TaskFlow</span>
+        <button class="sidebar-close" onclick="toggleSidebar()" id="sidebar-close-btn">✕</button>
+      </div>
+
+      <div class="sidebar-user" id="sidebar-user">
+        <div class="avatar" id="sidebar-avatar"></div>
+        <div class="user-info">
+          <span class="user-name" id="sidebar-name">Loading...</span>
+          <span class="user-role" id="sidebar-role">member</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="dashboard" onclick="navigate('dashboard', this)">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="#" class="nav-item" data-page="projects" onclick="navigate('projects', this)">
+          <span class="nav-icon">📁</span> Projects
+        </a>
+        <a href="#" class="nav-item" data-page="tasks" onclick="navigate('tasks', this)">
+          <span class="nav-icon">✅</span> My Tasks
+        </a>
+        <a href="#" class="nav-item admin-only hidden" data-page="team" onclick="navigate('team', this)">
+          <span class="nav-icon">👥</span> Team
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="handleLogout()">
+          <span>🚪</span> Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="topbar-right">
+          <div class="topbar-user" id="topbar-user">
+            <div class="avatar sm" id="topbar-avatar"></div>
+            <span id="topbar-name"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Pages -->
+      <div id="page-dashboard" class="page active"></div>
+      <div id="page-projects" class="page"></div>
+      <div id="page-tasks" class="page"></div>
+      <div id="page-team" class="page"></div>
+      <div id="page-project-detail" class="page"></div>
+      <div id="page-task-detail" class="page"></div>
+    </main>
+  </div>
+
+  <!-- ── Modals ────────────────────────────────────────────────────────────── -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
+    <div class="modal" id="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ── Toast ─────────────────────────────────────────────────────────────── -->
+  <div id="toast-container"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/projects.js"></script>
+  <script src="js/pages/tasks.js"></script>
+  <script src="js/pages/team.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
