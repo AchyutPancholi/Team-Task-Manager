@@ -13,7 +13,6 @@ COPY . .
 
 # Environment variables
 ENV NODE_ENV=production
-ENV PORT=5000
 
 # Railway will provide DATABASE_URL
 
